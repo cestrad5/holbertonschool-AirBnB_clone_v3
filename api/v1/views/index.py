@@ -1,33 +1,33 @@
 #!/usr/bin/python3
-"""General Routes"""
+"""Flask application that retrieves information"""
 from api.v1.views import app_views
 from flask import jsonify
-from models import storage
-from models.amenity import Amenity
-from models.city import City
-from models.place import Place
-from models.review import Review
-from models.state import State
-from models.user import User
 
 
-@app_views.route('/status', methods=['GET'], strict_slashes=False)
+@app_views.route("/status", strict_slashes=False)
 def status():
-    """Returning the api status"""
-    return jsonify(status='OK')
+    """Returns the app status"""
+    return jsonify({"status": "OK"})
 
 
-@app_views.route('/stats', methods=['GET'], strict_slashes=False)
+@app_views.route("/stats", methods=["GET"], strict_slashes=False)
 def stats():
-    """Returning the classes with their number of instances"""
-    classes = {
-        "amenities": Amenity, "cities": City,
-        "places": Place, "reviews": Review,
-        "states": State, "users": User
+    """Retrieves the number of objects per each type"""
+    from models.amenity import Amenity
+    from models.city import City
+    from models.place import Place
+    from models.review import Review
+    from models.state import State
+    from models.user import User
+    from models import storage
+    import json
+    dic = {
+        "amenities": storage.count(Amenity),
+        "cities": storage.count(City),
+        "places": storage.count(Place),
+        "reviews": storage.count(Review),
+        "states": storage.count(State),
+        "users": storage.count(User)
     }
-    count_dict = dict()
-
-    for plural, cls in classes.items():
-        count_dict[plural] = storage.count(cls)
-
-    return jsonify(count_dict)
+    json_dict = json.dumps(dic, indent=2)
+    return json_dict
